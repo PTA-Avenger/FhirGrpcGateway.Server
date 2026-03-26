@@ -2,6 +2,8 @@ syntax = "proto3";
 option csharp_namespace = "FhirGrpcGateway.Server";
 import "google/protobuf/timestamp.proto";
 
+import "common.proto";
+
 service EncounterApi {
   rpc GetPatientEncounters (EncounterListRequest) returns (EncounterListResponse);
 }
@@ -14,8 +16,8 @@ message EncounterListRequest {
 message EncounterResponse {
   string id = 1;
   string status = 2; // planned, in-progress, finished
-  Coding class = 3;  // inpatient, outpatient, emergency
-  repeated CodeableConcept type = 4; // e.g., "Follow up"
+  common.Coding class = 3;  // inpatient, outpatient, emergency
+  repeated common.CodeableConcept type = 4; // e.g., "Follow up"
   string subject_id = 5;
   
   // Period of the visit
@@ -23,7 +25,7 @@ message EncounterResponse {
   google.protobuf.Timestamp end = 7;
   
   // The reason for the visit (helps MCP explain context)
-  repeated CodeableConcept reason_code = 8;
+  repeated common.CodeableConcept reason_code = 8;
   string location_display = 9; 
 }
 

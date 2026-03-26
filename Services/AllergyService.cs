@@ -2,10 +2,12 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Google.Protobuf.WellKnownTypes;
-using Task = System.Threading.Tasks.Task;
-using FhirGrpcGateway.Server;
+using FhirGrpcGateway.Server; // FIXED: Removed .Protos
 
 namespace FhirGrpcGateway.Server.Services;
+
+// Use global alias to avoid conflict between System.Threading.Tasks and Google.Protobuf.WellKnownTypes
+using Task = System.Threading.Tasks.Task;
 
 public class AllergyService : AllergyApi.AllergyApiBase
 {
@@ -18,7 +20,7 @@ public class AllergyService : AllergyApi.AllergyApiBase
         _fhirClient = fhirClient;
     }
 
-    public override async System.Threading.Tasks.Task<AllergyListResponse> GetPatientAllergies(AllergyListRequest request, ServerCallContext context)
+    public override async Task<AllergyListResponse> GetPatientAllergies(AllergyListRequest request, ServerCallContext context)
     {
         _logger.LogInformation("Fetching allergies for Patient {ID}", request.PatientId);
 
@@ -53,7 +55,6 @@ public class AllergyService : AllergyApi.AllergyApiBase
             Id = a.Id,
             Code = MapToProtoConcept(a.Code),
             Type = a.Type?.ToString() ?? "unknown",
-            Category = a.Category?.FirstOrDefault()?.ToString() ?? "unknown",
             Criticality = a.Criticality?.ToString() ?? "unable-to-assess",
             ClinicalStatus = a.ClinicalStatus?.Coding?.FirstOrDefault()?.Code ?? "unknown"
         };
@@ -63,12 +64,12 @@ public class AllergyService : AllergyApi.AllergyApiBase
             resp.RecordedDate = Timestamp.FromDateTime(a.RecordedDateElement.ToDateTimeOffset(TimeSpan.Zero).UtcDateTime);
         }
 
-        // Map Reactions
         foreach (var r in a.Reaction)
         {
             var protoReaction = new Reaction
             {
-                Substance = MapToProtoConcept(r.Substance),
+                // R5 FIX: Substance is now a CodeableReference. We extract the .Concept part.
+                Substance = MapToProtoConcept(r.Substance?.Concept),
                 Severity = r.Severity?.ToString() ?? "unknown"
             };
 
@@ -79,17 +80,22 @@ public class AllergyService : AllergyApi.AllergyApiBase
         return resp;
     }
 
-    private Protos.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
+    // Helper to map FHIR CodeableConcept to our Proto version
+    private FhirGrpcGateway.Server.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
     {
-        if (fhirConcept == null) return new Protos.CodeableConcept();
+        if (fhirConcept == null) return new FhirGrpcGateway.Server.CodeableConcept();
 
-        var protoConcept = new Protos.CodeableConcept { Text = fhirConcept.Text ?? "" };
-        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new Protos.Coding
+        var protoConcept = new FhirGrpcGateway.Server.CodeableConcept { Text = fhirConcept.Text ?? "" };
+
+        if (fhirConcept.Coding != null)
         {
-            System = c.System ?? "",
-            Code = c.Code ?? "",
-            Display = c.Display ?? ""
-        }));
+            protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new FhirGrpcGateway.Server.Coding
+            {
+                System = c.System ?? "",
+                Code = c.Code ?? "",
+                Display = c.Display ?? ""
+            }));
+        }
 
         return protoConcept;
     }

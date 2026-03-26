@@ -14,7 +14,7 @@ message AllergyListRequest {
 
 message AllergyIntoleranceResponse {
   string id = 1;
-  fhir.common.CodeableConcept code = 2; // The allergen (e.g., "Penicillin")
+  common.CodeableConcept code = 2; // The allergen (e.g., "Penicillin")
   string type = 3;                      // allergy | intolerance
   string category = 4;                  // food | medication | environment | biologic
   string criticality = 5;               // low | high | unable-to-assess
@@ -25,8 +25,8 @@ message AllergyIntoleranceResponse {
 }
 
 message Reaction {
-  fhir.common.CodeableConcept substance = 1;
-  repeated fhir.common.CodeableConcept manifestation = 2; // e.g., "Hives"
+  common.CodeableConcept substance = 1;
+  repeated common.CodeableConcept manifestation = 2; // e.g., "Hives"
   string severity = 3;                                    // mild | moderate | severe
 }
 

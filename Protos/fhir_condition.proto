@@ -4,6 +4,8 @@ option csharp_namespace = "FhirGrpcGateway.Server";
 
 import "google/protobuf/timestamp.proto";
 
+import "common.proto";
+
 service ConditionApi {
   // Enhanced to support listing/filtering, which MCP tools require
   rpc GetPatientConditions (ConditionListRequest) returns (ConditionListResponse);
@@ -24,14 +26,14 @@ message ConditionResponse {
   
   // REQUIRED: clinicalStatus (active, recurrence, resolved) 
   // and verificationStatus (unconfirmed, provisional, confirmed)
-  CodeableConcept clinical_status = 2; 
-  CodeableConcept verification_status = 3;
+  common.CodeableConcept clinical_status = 2; 
+  common.CodeableConcept verification_status = 3;
   
   // FHIR Category (Crucial for AI filtering)
-  repeated CodeableConcept category = 4;
+  repeated common.CodeableConcept category = 4;
   
   // The Diagnosis (SNOMED-CT or ICD-10)
-  CodeableConcept code = 5; 
+  common.CodeableConcept code = 5; 
   
   string subject = 6; // Reference to Patient
   
@@ -54,16 +56,6 @@ message ConditionResponse {
   string note = 14; 
 }
 
-message CodeableConcept {
-  string text = 1;           // Human readable (e.g., "Type 2 Diabetes")
-  repeated Coding coding = 2; // Machine readable
-}
-
-message Coding {
-  string system = 1; // e.g., "http://snomed.info"
-  string code = 2;   // e.g., "44054006"
-  string display = 3;
-}
 
 message ConditionListResponse {
   repeated ConditionResponse conditions = 1;

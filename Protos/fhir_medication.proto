@@ -2,6 +2,7 @@ syntax = "proto3";
 option csharp_namespace = "FhirGrpcGateway.Server";
 import "google/protobuf/timestamp.proto";
 
+import "common.proto";
 service MedicationApi {
   rpc GetPatientMedications (MedicationListRequest) returns (MedicationListResponse);
 }
@@ -15,7 +16,7 @@ message MedicationResponse {
   string id = 1;
   string status = 2; 
   string intent = 3; // order, proposal, plan
-  CodeableConcept medication = 4; // RxNorm code
+  common.CodeableConcept medication = 4; // RxNorm code
   string subject_id = 5;
   google.protobuf.Timestamp authored_on = 6;
   string requester_display = 7; // Who prescribed it?

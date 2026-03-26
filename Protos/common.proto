@@ -1,24 +1,38 @@
 syntax = "proto3";
 
-option csharp_namespace = "FhirGrpcGateway.Server.Protos";
+option csharp_namespace = "FhirGrpcGateway.Server";
 
-// Add this near the top of your file
-package fhir.common; 
-
-message Reference {
-  string reference = 1; // e.g., "Observation/123"
-  string type = 2;      // e.g., "Observation"
-  string display = 3;   // human-readable name
-}
+package common;
 
 message Coding {
   string system = 1;
-  string version = 2;
-  string code = 3;
-  string display = 4;
+  string code = 2;
+  string display = 3;
 }
 
 message CodeableConcept {
-  repeated Coding coding = 1;
-  string text = 2;
+  string text = 1;
+  repeated Coding coding = 2;
+}
+
+message Identifier {
+  string system = 1;
+  string value = 2;
+}
+
+message Reference {
+  string reference = 1; // e.g., "Patient/123"
+  string display = 2;   // e.g., "Thato Mabena"
+}
+
+message HumanName {
+  string family = 1;
+  repeated string given = 2;
+  repeated string prefix = 3;
+}
+
+message ContactPoint {
+  string system = 1; // phone | email | pager
+  string value = 2;
+  string use = 3;    // home | work | mobile
 }

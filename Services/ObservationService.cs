@@ -3,6 +3,7 @@ using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Google.Protobuf.WellKnownTypes; // For Timestamp conversion
 using Task = System.Threading.Tasks.Task;
+ using FhirGrpcGateway.Server;
 
 namespace FhirGrpcGateway.Server.Services;
 

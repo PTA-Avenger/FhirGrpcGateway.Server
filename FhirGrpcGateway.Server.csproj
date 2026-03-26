@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -16,16 +16,15 @@
   </ItemGroup>
 
 <ItemGroup>
-	<Protobuf Include="Protos\fhir_patient.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\fhir_condition.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\fhir_diagnosticreport.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\fhir_encounter.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\fhir_medication.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\fhir_observation.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\fhir_practioner.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\fhir_procedure.proto" GrpcServices="Server" />
-	<Protobuf Include="Protos\common.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\common.proto" GrpcServices="None" />
+	<Protobuf Include="Protos\fhir_patient.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
+	<Protobuf Include="Protos\fhir_condition.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
+	<Protobuf Include="Protos\fhir_diagnosticreport.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
+	<Protobuf Include="Protos\fhir_encounter.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
+	<Protobuf Include="Protos\fhir_medication.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
+	<Protobuf Include="Protos\fhir_observation.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
+	<Protobuf Include="Protos\fhir_practioner.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
+	<Protobuf Include="Protos\fhir_procedure.proto" GrpcServices="Server" AdditionalImportDirs="Protos\" />
 </ItemGroup>
-
-
+	
 </Project>

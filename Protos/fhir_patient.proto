@@ -2,6 +2,8 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto"; // Required for ListPatients
 
+import "common.proto";
+
 option csharp_namespace = "FhirGrpcGateway.Server.Protos";
 
 package fhir;

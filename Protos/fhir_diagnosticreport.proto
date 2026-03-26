@@ -1,7 +1,7 @@
 syntax = "proto3";
 option csharp_namespace = "FhirGrpcGateway.Server";
 import "google/protobuf/timestamp.proto";
-import "./common.proto";
+
 import "common.proto";
 
 service DiagnosticReportApi {
@@ -16,13 +16,13 @@ message ReportListRequest {
 message DiagnosticReportResponse {
   string id = 1;
   string status = 2; // preliminary | final | amended
-  fhir.common.CodeableConcept code = 3; // Name of report (e.g., "Complete Blood Count")
-  fhir.common.Reference subject = 4;
+  common.CodeableConcept code = 3; // Name of report (e.g., "Complete Blood Count")
+  common.Reference subject = 4;
   
   google.protobuf.Timestamp effective_date_time = 5;
   google.protobuf.Timestamp issued = 6;
   
-  repeated fhir.common.Reference result = 7; // References to Observation IDs
+  repeated common.Reference result = 7; // References to Observation IDs
   string conclusion = 8;                      // Summary text for MCP AI to read
 }
 
