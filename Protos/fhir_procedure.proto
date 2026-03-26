@@ -1,0 +1,30 @@
+syntax = "proto3";
+option csharp_namespace = "FhirGrpcGateway.Server";
+import "google/protobuf/timestamp.proto";
+
+service ProcedureApi {
+  rpc GetPatientProcedures (ProcedureListRequest) returns (ProcedureListResponse);
+}
+
+message ProcedureListRequest {
+  string patient_id = 1;
+  google.protobuf.Timestamp date_from = 2;
+}
+
+message ProcedureResponse {
+  string id = 1;
+  string status = 2; // completed | in-progress | aborted
+  fhir.common.CodeableConcept code = 3; // e.g., "Appendectomy"
+  fhir.common.Reference subject = 4;     // Patient
+  
+  oneof performed {
+    google.protobuf.Timestamp performed_date_time = 5;
+    string performed_string = 6;
+  }
+  
+  repeated fhir.common.Reference recorder = 7; // Who documented it
+  repeated fhir.common.CodeableConcept reason_code = 8; // Why was it done?
+  string outcome_text = 9;
+}
+
+message ProcedureListResponse { repeated ProcedureResponse procedures = 1; }

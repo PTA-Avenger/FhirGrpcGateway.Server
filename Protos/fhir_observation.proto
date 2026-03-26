@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option csharp_namespace = "FhirGrpcGateway.Server";
+
+import "google/protobuf/timestamp.proto";
+
+service ObservationApi {
+  // Supports date filtering and pagination
+  rpc GetPatientObservations (ObservationRequest) returns (ObservationListResponse);
+}
+
+message ObservationRequest {
+  string patient_id = 1;
+  string category = 2;       // e.g., "vital-signs", "laboratory"
+  string code = 3;           // Optional: Specific LOINC code (e.g., "8867-4")
+  
+  // Essential for MCP: "Get labs from last month"
+  google.protobuf.Timestamp date_from = 4;
+  google.protobuf.Timestamp date_to = 5; 
+  
+  int32 limit = 6;           // Pagination is mandatory for medical data
+}
+
+message ObservationResponse {
+  string id = 1;
+  string status = 2;         // REQUIRED: "final", "preliminary", "amended"
+  Coding code = 3;           // The test name (LOINC)
+  
+  // FHIR "effective[x]" - When the measurement happened
+  google.protobuf.Timestamp effective_date_time = 4;
+
+  // FHIR "value[x]" - Polymorphic value handling
+  oneof value {
+    Quantity value_quantity = 5;
+    string value_string = 6;
+    Coding value_concept = 7; // e.g., "Detected", "Reactive"
+  }
+
+  // For multi-part observations like Blood Pressure (120/80)
+  repeated Component component = 8;
+
+  // Context for the AI (Is this good or bad?)
+  repeated Coding interpretation = 9; // e.g., "H" (High), "L" (Low)
+  repeated ReferenceRange reference_range = 10;
+}
+
+message Component {
+  Coding code = 1;           // e.g., "Systolic Blood Pressure"
+  oneof value {
+    Quantity value_quantity = 2;
+    string value_string = 3;
+    Coding value_concept = 4;
+  }
+}
+
+message Quantity {
+  double value = 1;
+  string unit = 2;           // e.g., "kg", "mm[Hg]"
+  string system = 3;         // e.g., "http://unitsofmeasure.org"
+  string code = 4;           // UCUM code
+}
+
+message Coding {
+  string system = 1;         // e.g., "http://loinc.org"
+  string code = 2;           // e.g., "8867-4"
+  string display = 3;        // e.g., "Heart rate"
+}
+
+message ReferenceRange {
+  Quantity low = 1;
+  Quantity high = 2;
+  string text = 3;           // e.g., "Male: 13.5-17.5 g/dL"
+}
+
+message ObservationListResponse {
+  repeated ObservationResponse observations = 1;
+  string next_page_token = 2; // For pagination
+}

@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>a0bce4fd-6f6b-4ae2-a0e2-7ecf1b3bab98</UserSecretsId>
+    <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>
+    <DockerfileContext>.</DockerfileContext>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.64.0" />
+    <PackageReference Include="HL7.Fhir.R5" Version="6.1.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+  </ItemGroup>
+
+<ItemGroup>
+	<Protobuf Include="Protos\fhir_patient.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\fhir_condition.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\fhir_diagnosticreport.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\fhir_encounter.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\fhir_medication.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\fhir_observation.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\fhir_practioner.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\fhir_procedure.proto" GrpcServices="Server" />
+	<Protobuf Include="Protos\common.proto" GrpcServices="Server" />
+</ItemGroup>
+
+
+</Project>

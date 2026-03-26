@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto"; // Required for ListPatients
+
+option csharp_namespace = "FhirGrpcGateway.Server.Protos";
+
+package fhir;
+
+service PatientApi {
+    rpc GetPatient (PatientRequest) returns (PatientResponse);
+    rpc ListPatients (google.protobuf.Empty) returns (PatientListResponse); // Added
+    rpc CreatePatient (PatientRequest) returns (PatientResponse);           // Added
+    rpc DeletePatient (PatientRequest) returns (PatientResponse);           // Added
+    rpc SearchPatients (PatientSearchRequest) returns (PatientListResponse); // Advanced Search
+    rpc GetEverything  (PatientRequest) returns (stream ResourceBundleResponse); // $everything Operation (Server Streaming for Large records)
+    rpc MatchPatient (PatientRequest) returns (PatientListResponse); // $match (MPI Lookup)
+}
+
+message PatientRequest {
+    string id = 1;
+    string name = 2;       // Added
+    string gender = 3;     // Added
+    string birthDate = 4;  // Added
+    repeated ContactPointMessage telecom = 5; // Added
+}
+
+message PatientSearchRequest{
+    string family_name = 1;
+    string given_name = 2;
+    string identifier = 3; // id number
+    string birthdate_before = 4; // Search for patients born before this date
+    string birthdate_after = 5;  // Search for patients born after this date
+    bool active_only = 6; // Search for active patients only
+}
+message PatientResponse {
+    string id = 1;
+    string name = 2; 
+    string gender = 3; 
+    string birthDate = 4; 
+    string status = 5;     // Added
+    repeated ContactPointMessage telecom = 6; // Changed to repeated message
+}
+
+message PatientListResponse {
+    repeated PatientResponse patients = 1; // Added
+}
+
+message ContactPointMessage {
+    string system = 1;
+    string value = 2;
+    string use = 3;
+}
+
+message ResourceBundleResponse{
+    string resource_type = 1;
+    string json_data = 2; // JSON representation of the resource, can be parsed by the client
+}

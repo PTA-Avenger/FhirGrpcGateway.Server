@@ -1,0 +1,24 @@
+syntax = "proto3";
+option csharp_namespace = "FhirGrpcGateway.Server";
+import "google/protobuf/timestamp.proto";
+
+service PractitionerApi {
+  rpc GetPractitioner (PractitionerRequest) returns (PractitionerResponse);
+}
+
+message PractitionerRequest { string id = 1; }
+
+message PractitionerResponse {
+  string id = 1;
+  repeated fhir.common.Identifier identifier = 2; // e.g., NPI number
+  bool active = 3;
+  repeated fhir.common.HumanName name = 4;
+  repeated fhir.common.ContactPoint telecom = 5;
+  
+  repeated Qualification qualification = 6;
+}
+
+message Qualification {
+  fhir.common.Identifier identifier = 1;
+  fhir.common.CodeableConcept code = 2; // e.g., "MD" or "RN"
+}

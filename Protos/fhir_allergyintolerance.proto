@@ -1,0 +1,33 @@
+syntax = "proto3";
+option csharp_namespace = "FhirGrpcGateway.Server";
+import "google/protobuf/timestamp.proto";
+import "common.proto"; // Assuming common.proto contains CodeableConcept/Coding
+
+service AllergyApi {
+  rpc GetPatientAllergies (AllergyListRequest) returns (AllergyListResponse);
+}
+
+message AllergyListRequest {
+  string patient_id = 1;
+  string clinical_status = 2; // e.g., "active", "resolved"
+}
+
+message AllergyIntoleranceResponse {
+  string id = 1;
+  fhir.common.CodeableConcept code = 2; // The allergen (e.g., "Penicillin")
+  string type = 3;                      // allergy | intolerance
+  string category = 4;                  // food | medication | environment | biologic
+  string criticality = 5;               // low | high | unable-to-assess
+  string clinical_status = 6;           // active | inactive | resolved
+  
+  repeated Reaction reaction = 7;
+  google.protobuf.Timestamp recorded_date = 8;
+}
+
+message Reaction {
+  fhir.common.CodeableConcept substance = 1;
+  repeated fhir.common.CodeableConcept manifestation = 2; // e.g., "Hives"
+  string severity = 3;                                    // mild | moderate | severe
+}
+
+message AllergyListResponse { repeated AllergyIntoleranceResponse allergies = 1; }

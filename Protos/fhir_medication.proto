@@ -1,0 +1,30 @@
+syntax = "proto3";
+option csharp_namespace = "FhirGrpcGateway.Server";
+import "google/protobuf/timestamp.proto";
+
+service MedicationApi {
+  rpc GetPatientMedications (MedicationListRequest) returns (MedicationListResponse);
+}
+
+message MedicationListRequest {
+  string patient_id = 1;
+  string status = 2; // active, completed, cancelled
+}
+
+message MedicationResponse {
+  string id = 1;
+  string status = 2; 
+  string intent = 3; // order, proposal, plan
+  CodeableConcept medication = 4; // RxNorm code
+  string subject_id = 5;
+  google.protobuf.Timestamp authored_on = 6;
+  string requester_display = 7; // Who prescribed it?
+  
+  // High value for MCP: Readable instructions
+  string dosage_instruction_text = 8; 
+  
+  // For context: Why was this prescribed?
+  repeated string reason_reference_ids = 9; 
+}
+
+message MedicationListResponse { repeated MedicationResponse medications = 1; }

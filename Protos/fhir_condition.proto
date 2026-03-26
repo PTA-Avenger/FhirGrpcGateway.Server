@@ -1,0 +1,70 @@
+syntax = "proto3";
+
+option csharp_namespace = "FhirGrpcGateway.Server";
+
+import "google/protobuf/timestamp.proto";
+
+service ConditionApi {
+  // Enhanced to support listing/filtering, which MCP tools require
+  rpc GetPatientConditions (ConditionListRequest) returns (ConditionListResponse);
+  rpc GetCondition (ConditionRequest) returns (ConditionResponse);
+}
+
+message ConditionListRequest {
+  string patient_id = 1;
+  string category = 2; // e.g., "problem-list-item" or "encounter-diagnosis"
+}
+
+message ConditionRequest {
+  string id = 1;
+}
+
+message ConditionResponse {
+  string id = 1;
+  
+  // REQUIRED: clinicalStatus (active, recurrence, resolved) 
+  // and verificationStatus (unconfirmed, provisional, confirmed)
+  CodeableConcept clinical_status = 2; 
+  CodeableConcept verification_status = 3;
+  
+  // FHIR Category (Crucial for AI filtering)
+  repeated CodeableConcept category = 4;
+  
+  // The Diagnosis (SNOMED-CT or ICD-10)
+  CodeableConcept code = 5; 
+  
+  string subject = 6; // Reference to Patient
+  
+  // Timing: When it started and when it ended
+  oneof onset {
+    google.protobuf.Timestamp onset_date_time = 7;
+    string onset_string = 8;
+  }
+  
+  oneof abatement {
+    google.protobuf.Timestamp abatement_date_time = 9;
+    string abatement_string = 10;
+    bool abatement_boolean = 11; // true if resolved but date is unknown
+  }
+
+  string recorded_date = 12;
+  string asserter = 13; // Who made the diagnosis?
+  
+  // Narrative summary for the MCP agent to read directly
+  string note = 14; 
+}
+
+message CodeableConcept {
+  string text = 1;           // Human readable (e.g., "Type 2 Diabetes")
+  repeated Coding coding = 2; // Machine readable
+}
+
+message Coding {
+  string system = 1; // e.g., "http://snomed.info"
+  string code = 2;   // e.g., "44054006"
+  string display = 3;
+}
+
+message ConditionListResponse {
+  repeated ConditionResponse conditions = 1;
+}
