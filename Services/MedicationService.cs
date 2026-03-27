@@ -2,10 +2,11 @@
 using Hl7.Fhir.Model;
 using Hl7.Fhir.Rest;
 using Google.Protobuf.WellKnownTypes;
-using Task = System.Threading.Tasks.Task;
-using FhirGrpcGateway.Server;
+using FhirGrpcGateway.Server; // Ensure this matches your .proto csharp_namespace
 
 namespace FhirGrpcGateway.Server.Services;
+
+using Task = System.Threading.Tasks.Task;
 
 public class MedicationService : MedicationApi.MedicationApiBase
 {
@@ -18,10 +19,11 @@ public class MedicationService : MedicationApi.MedicationApiBase
         _fhirClient = fhirClient;
     }
 
-    public override async System.Threading.Tasks.Task<MedicationListResponse> GetPatientMedications(MedicationListRequest request, ServerCallContext context)
+    public override async Task<MedicationListResponse> GetPatientMedications(MedicationListRequest request, ServerCallContext context)
     {
         _logger.LogInformation("Fetching medications for Patient {ID}", request.PatientId);
 
+        // R5 search parameter for patient is 'subject'
         var searchParams = new SearchParams().Where($"subject=Patient/{request.PatientId}");
 
         if (!string.IsNullOrEmpty(request.Status))
@@ -56,11 +58,11 @@ public class MedicationService : MedicationApi.MedicationApiBase
             SubjectId = mr.Subject?.Reference ?? "",
             RequesterDisplay = mr.Requester?.Display ?? "Unknown Provider",
 
-            // Flattening the dosage for easier AI consumption
+            // Flattening the dosage
             DosageInstructionText = string.Join("; ", mr.DosageInstruction.Select(d => d.Text)),
 
-            // Mapping the Medication CodeableConcept (RxNorm)
-            Medication = MapToProtoConcept(mr.Medication as CodeableConcept)
+            // R5 FIX: mr.Medication is a CodeableReference. We extract the Concept.
+            Medication = MapToProtoConcept(mr.Medication?.Concept)
         };
 
         if (mr.AuthoredOnElement != null)
@@ -68,22 +70,36 @@ public class MedicationService : MedicationApi.MedicationApiBase
             resp.AuthoredOn = Timestamp.FromDateTime(mr.AuthoredOnElement.ToDateTimeOffset(TimeSpan.Zero).UtcDateTime);
         }
 
-        // Map Reason References (Linking back to Conditions/Observations)
-        resp.ReasonReferenceIds.AddRange(mr.ReasonReference.Select(r => r.Reference));
+        // R5 FIX: 'ReasonReference' is now 'Reason' (List of CodeableReference)
+        if (mr.Reason != null)
+        {
+            resp.ReasonReferenceIds.AddRange(
+                mr.Reason
+                  .Where(r => r.Reference != null)
+                  .Select(r => r.Reference.Reference)
+            );
+        }
 
         return resp;
     }
 
-    private Protos.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
+    // Explicitly use the generated namespace to avoid HL7.Fhir conflicts
+    private FhirGrpcGateway.Server.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
     {
-        if (fhirConcept == null) return new Protos.CodeableConcept();
-        var protoConcept = new Protos.CodeableConcept { Text = fhirConcept.Text ?? "" };
-        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new Protos.Coding
+        if (fhirConcept == null) return new FhirGrpcGateway.Server.CodeableConcept();
+
+        var protoConcept = new FhirGrpcGateway.Server.CodeableConcept { Text = fhirConcept.Text ?? "" };
+
+        if (fhirConcept.Coding != null)
         {
-            System = c.System ?? "",
-            Code = c.Code ?? "",
-            Display = c.Display ?? ""
-        }));
+            protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new FhirGrpcGateway.Server.Coding
+            {
+                System = c.System ?? "",
+                Code = c.Code ?? "",
+                Display = c.Display ?? ""
+            }));
+        }
+
         return protoConcept;
     }
 }

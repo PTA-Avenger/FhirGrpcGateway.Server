@@ -53,37 +53,40 @@ public class ProcedureService : ProcedureApi.ProcedureApiBase
             Id = p.Id,
             Status = p.Status?.ToString() ?? "unknown",
             Code = MapToProtoConcept(p.Code),
-            Subject = new Protos.Reference { Reference_ = p.Subject?.Reference ?? "" },
+            Subject = new Reference { Reference_ = p.Subject?.Reference ?? "" },
             OutcomeText = p.Outcome?.Text ?? ""
         };
 
         // Handle 'oneof performed' (Polymorphic Mapping)
-        if (p.Performed is FhirDateTime fdt)
+        if (p.Occurrence is FhirDateTime fdt)
         {
             resp.PerformedDateTime = Timestamp.FromDateTime(fdt.ToDateTimeOffset(TimeSpan.Zero).UtcDateTime);
         }
-        else if (p.Performed is FhirString fs)
+        else if (p.Occurrence is FhirString fs)
         {
             resp.PerformedString = fs.Value;
         }
 
         // Map Reason Codes
-        resp.ReasonCode.AddRange(p.ReasonCode.Select(MapToProtoConcept));
+        if(p.Reason != null)
+        {
+            resp.ReasonCode.AddRange(p.Reason.Where(r => r.Concept != null).Select(r => MapToProtoConcept(r.Concept)));
+        }
 
         // Map Recorder References
         if (p.Recorder != null)
         {
-            resp.Recorder.Add(new Protos.Reference { Reference_ = p.Recorder.Reference ?? "" });
+            resp.Recorder.Add(new Reference { Reference_ = p.Recorder.Reference ?? "" });
         }
 
         return resp;
     }
 
-    private Protos.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
+    private CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
     {
-        if (fhirConcept == null) return new Protos.CodeableConcept();
-        var protoConcept = new Protos.CodeableConcept { Text = fhirConcept.Text ?? "" };
-        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new Protos.Coding
+        if (fhirConcept == null) return new CodeableConcept();
+        var protoConcept = new CodeableConcept { Text = fhirConcept.Text ?? "" };
+        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new Coding
         {
             System = c.System ?? "",
             Code = c.Code ?? "",

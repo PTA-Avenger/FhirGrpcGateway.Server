@@ -72,7 +72,7 @@ public class ConditionService : ConditionApi.ConditionApiBase
             Code = MapToProtoConcept(c.Code),
             Subject = c.Subject?.Reference ?? "",
             RecordedDate = c.RecordedDate ?? "",
-            Asserter = c.Asserter?.Reference ?? "",
+            Asserter = c.Participant?.FirstOrDefault()?.Actor?.Reference ?? "",
             Note = string.Join(" | ", c.Note.Select(n => n.Text))
         };
 
@@ -96,12 +96,12 @@ public class ConditionService : ConditionApi.ConditionApiBase
         return resp;
     }
 
-    private Protos.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
+    private CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
     {
-        if (fhirConcept == null) return new Protos.CodeableConcept();
+        if (fhirConcept == null) return new CodeableConcept();
 
-        var protoConcept = new Protos.CodeableConcept { Text = fhirConcept.Text ?? "" };
-        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(coding => new Protos.Coding
+        var protoConcept = new CodeableConcept { Text = fhirConcept.Text ?? "" };
+        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(coding => new Coding
         {
             System = coding.System ?? "",
             Code = coding.Code ?? "",

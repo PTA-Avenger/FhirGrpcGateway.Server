@@ -1,6 +1,7 @@
 using FhirGrpcGateway.Server.Services;
 using Hl7.Fhir.Rest;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 

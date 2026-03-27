@@ -33,14 +33,14 @@ public class PractitionerService : PractitionerApi.PractitionerApiBase
             };
 
             // Map Identifiers (e.g., NPI numbers)
-            resp.Identifier.AddRange(practitioner.Identifier.Select(i => new Protos.Identifier
+            resp.Identifier.AddRange(practitioner.Identifier.Select(i => new Identifier
             {
                 System = i.System ?? "",
                 Value = i.Value ?? ""
             }));
 
             // Map Names
-            resp.Name.AddRange(practitioner.Name.Select(n => new Protos.HumanName
+            resp.Name.AddRange(practitioner.Name.Select(n => new HumanName
             {
                 Family = n.Family ?? "",
                 Given = { n.Given ?? new List<string>() },
@@ -48,7 +48,7 @@ public class PractitionerService : PractitionerApi.PractitionerApiBase
             }));
 
             // Map Telecom
-            resp.Telecom.AddRange(practitioner.Telecom.Select(t => new Protos.ContactPoint
+            resp.Telecom.AddRange(practitioner.Telecom.Select(t => new ContactPoint
             {
                 System = t.System?.ToString() ?? "",
                 Value = t.Value ?? "",
@@ -56,9 +56,9 @@ public class PractitionerService : PractitionerApi.PractitionerApiBase
             }));
 
             // Map Qualifications (MD, RN, Specializations)
-            resp.Qualification.AddRange(practitioner.Qualification.Select(q => new Protos.Qualification
+            resp.Qualification.AddRange(practitioner.Qualification.Select(q => new Qualification
             {
-                Identifier = q.Identifier.Select(i => new Protos.Identifier { Value = i.Value }).FirstOrDefault() ?? new Protos.Identifier(),
+                Identifier = q.Identifier.Select(i => new Identifier { Value = i.Value }).FirstOrDefault() ?? new Identifier(),
                 Code = MapToProtoConcept(q.Code)
             }));
 
@@ -71,11 +71,11 @@ public class PractitionerService : PractitionerApi.PractitionerApiBase
         }
     }
 
-    private Protos.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
+    private CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
     {
-        if (fhirConcept == null) return new Protos.CodeableConcept();
-        var protoConcept = new Protos.CodeableConcept { Text = fhirConcept.Text ?? "" };
-        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new Protos.Coding
+        if (fhirConcept == null) return new CodeableConcept();
+        var protoConcept = new CodeableConcept { Text = fhirConcept.Text ?? "" };
+        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new    Coding
         {
             System = c.System ?? "",
             Code = c.Code ?? "",

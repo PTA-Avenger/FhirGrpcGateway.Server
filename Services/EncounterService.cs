@@ -52,36 +52,41 @@ public class EncounterService : EncounterApi.EncounterApiBase
         {
             Id = e.Id,
             Status = e.Status?.ToString() ?? "unknown",
-            Class = MapToProtoCoding(e.Class),
+            Class = MapToProtoCoding(e.Class?.FirstOrDefault()?.Coding?.FirstOrDefault()),
             SubjectId = e.Subject?.Reference ?? "",
             LocationDisplay = e.Location?.FirstOrDefault()?.Location?.Display ?? "Unknown Location"
         };
 
         // Map Timestamps from FHIR Period
-        if (e.Period != null)
+        if (e.ActualPeriod != null)
         {
-            if (e.Period.StartElement != null)
-                resp.Start = Timestamp.FromDateTime(e.Period.StartElement.ToDateTimeOffset(TimeSpan.Zero).UtcDateTime);
+            if (e.ActualPeriod.StartElement != null)
+                resp.Start = Timestamp.FromDateTime(e.ActualPeriod.StartElement.ToDateTimeOffset(TimeSpan.Zero).UtcDateTime);
 
-            if (e.Period.EndElement != null)
-                resp.End = Timestamp.FromDateTime(e.Period.EndElement.ToDateTimeOffset(TimeSpan.Zero).UtcDateTime);
+            if (e.ActualPeriod.EndElement != null)
+                resp.End = Timestamp.FromDateTime(e.ActualPeriod.EndElement.ToDateTimeOffset(TimeSpan.Zero).UtcDateTime);
         }
 
         // Map Repeated Concepts (Type and Reason)
-        resp.Type.AddRange(e.Type.Select(MapToProtoConcept));
-        resp.ReasonCode.AddRange(e.ReasonCode.Select(r => MapToProtoConcept(r.CodeableConcept)));
-
+        if(e.Type != null)
+        {
+            resp.Type.AddRange(e.Type.Select(MapToProtoConcept));
+        }
+        if(e.Reason != null)
+        {
+            var reasonConcepts = e.Reason.SelectMany(r => r.Value).Where(cr => cr.Concept != null).Select(cr => MapToProtoConcept(cr.Concept));
+        }
         return resp;
     }
 
-    private Protos.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
+    private CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
     {
-        if (fhirConcept == null) return new Protos.CodeableConcept();
-        var protoConcept = new Protos.CodeableConcept { Text = fhirConcept.Text ?? "" };
+        if (fhirConcept == null) return new CodeableConcept();
+        var protoConcept = new CodeableConcept { Text = fhirConcept.Text ?? "" };
         protoConcept.Coding.AddRange(fhirConcept.Coding.Select(MapToProtoCoding));
         return protoConcept;
     }
 
-    private Protos.Coding MapToProtoCoding(Hl7.Fhir.Model.Coding c) => c == null ? new Protos.Coding() :
-        new Protos.Coding { System = c.System ?? "", Code = c.Code ?? "", Display = c.Display ?? "" };
+    private Coding MapToProtoCoding(Hl7.Fhir.Model.Coding c) => c == null ? new Coding() :
+        new Coding { System = c.System ?? "", Code = c.Code ?? "", Display = c.Display ?? "" };
 }

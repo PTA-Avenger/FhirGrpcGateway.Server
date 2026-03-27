@@ -62,20 +62,29 @@ public class PatientService : PatientApi.PatientApiBase
     {
         try
         {
-            var newPatient = new Patient();
-            if (!string.IsNullOrEmpty(request.Name))
-                newPatient.Name.Add(new HumanName { Family = request.Name });
+            // 1. We are creating a FHIR Model Patient
+            var newPatient = new Hl7.Fhir.Model.Patient();
 
-            if (System.Enum.TryParse<AdministrativeGender>(request.Gender, true, out var gender))
+            // 2. Map Name (Use the FHIR Model HumanName)
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                newPatient.Name.Add(new Hl7.Fhir.Model.HumanName { Family = request.Name });
+            }
+
+            // 3. Map Gender
+            if (System.Enum.TryParse<Hl7.Fhir.Model.AdministrativeGender>(request.Gender, true, out var gender))
+            {
                 newPatient.Gender = gender;
+            }
 
             newPatient.BirthDate = request.BirthDate;
 
-            newPatient.Telecom = request.Telecom.Select(t => new ContactPoint
+            // 4. Map Telecom (Use FHIR Model ContactPoint and Enums)
+            newPatient.Telecom = request.Telecom.Select(t => new Hl7.Fhir.Model.ContactPoint
             {
-                System = System.Enum.TryParse<ContactPoint.ContactPointSystem>(t.System, true, out var sys) ? sys : null,
+                System = System.Enum.TryParse<Hl7.Fhir.Model.ContactPoint.ContactPointSystem>(t.System, true, out var sys) ? sys : null,
                 Value = t.Value,
-                Use = System.Enum.TryParse<ContactPoint.ContactPointUse>(t.Use, true, out var use) ? use : null
+                Use = System.Enum.TryParse<Hl7.Fhir.Model.ContactPoint.ContactPointUse>(t.Use, true, out var use) ? use : null
             }).ToList();
 
             var created = await _fhirClient.CreateAsync(newPatient);

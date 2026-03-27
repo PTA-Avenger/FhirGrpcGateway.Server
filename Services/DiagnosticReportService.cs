@@ -53,7 +53,7 @@ public class DiagnosticReportService : DiagnosticReportApi.DiagnosticReportApiBa
             Id = dr.Id,
             Status = dr.Status?.ToString() ?? "unknown",
             Code = MapToProtoConcept(dr.Code),
-            Subject = new Protos.Reference { Reference_ = dr.Subject?.Reference ?? "" },
+            Subject = new Reference { Reference_ = dr.Subject?.Reference ?? "" },
             Conclusion = dr.Conclusion ?? ""
         };
 
@@ -65,7 +65,7 @@ public class DiagnosticReportService : DiagnosticReportApi.DiagnosticReportApiBa
             resp.Issued = Timestamp.FromDateTime(dr.Issued.Value.UtcDateTime);
 
         // Map Result References (Linking to Observations)
-        resp.Result.AddRange(dr.Result.Select(r => new Protos.Reference
+        resp.Result.AddRange(dr.Result.Select(r => new Reference
         {
             Reference_ = r.Reference ?? "",
             Display = r.Display ?? ""
@@ -74,11 +74,11 @@ public class DiagnosticReportService : DiagnosticReportApi.DiagnosticReportApiBa
         return resp;
     }
 
-    private Protos.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
+    private CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableConcept fhirConcept)
     {
-        if (fhirConcept == null) return new Protos.CodeableConcept();
-        var protoConcept = new Protos.CodeableConcept { Text = fhirConcept.Text ?? "" };
-        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new Protos.Coding
+        if (fhirConcept == null) return new CodeableConcept();
+        var protoConcept = new CodeableConcept { Text = fhirConcept.Text ?? "" };
+        protoConcept.Coding.AddRange(fhirConcept.Coding.Select(c => new Coding
         {
             System = c.System ?? "",
             Code = c.Code ?? "",

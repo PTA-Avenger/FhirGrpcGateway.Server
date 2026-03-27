@@ -69,7 +69,7 @@ public class AllergyService : AllergyApi.AllergyApiBase
             var protoReaction = new Reaction
             {
                 // R5 FIX: Substance is now a CodeableReference. We extract the .Concept part.
-                Substance = MapToProtoConcept(r.Substance?.Concept),
+                Substance = MapToProtoConcept(r.Substance),
                 Severity = r.Severity?.ToString() ?? "unknown"
             };
 
@@ -78,6 +78,18 @@ public class AllergyService : AllergyApi.AllergyApiBase
         }
 
         return resp;
+    }
+
+    // New Overload to handle CodeableReference<CodeableConcept>
+    private FhirGrpcGateway.Server.CodeableConcept MapToProtoConcept(Hl7.Fhir.Model.CodeableReference fhirReference)
+    {
+        // If the reference is null or doesn't have a Concept, return an empty CodeableConcept
+        if (fhirReference?.Concept == null)
+        {
+            return new FhirGrpcGateway.Server.CodeableConcept();
+        }
+
+        return MapToProtoConcept(fhirReference.Concept);
     }
 
     // Helper to map FHIR CodeableConcept to our Proto version
