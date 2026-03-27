@@ -1,0 +1,35 @@
+﻿### 1. Health Check
+# Ensures the gRPC Health Check service is active and the FHIR Store is reachable.
+GRPC http://localhost:5001/grpc.health.v1.Health/Check
+{
+  "service": "FhirStore"
+}
+
+### 2. Get Patient Identity
+# Fetches a standard test patient from the HAPI R5 server.
+GRPC http://localhost:5001/FhirGrpcGateway.Server.PatientApi/GetPatient
+{
+  "id": "example"
+}
+
+### 3. Search for Observations (Vitals)
+# Queries blood pressure or heart rate data for a specific patient.
+GRPC http://localhost:5001/FhirGrpcGateway.Server.ObservationApi/GetPatientObservations
+{
+  "patient_id": "example",
+  "limit": 5
+}
+
+### 4. List Active Conditions
+# Retrieves the current problem list for an AI/MCP agent to process.
+GRPC http://localhost:5001/FhirGrpcGateway.Server.ConditionApi/GetPatientConditions
+{
+  "patient_id": "example"
+}
+
+### 5. Stream Full Medical Record ($everything)
+# Test the server-side streaming capability for bulk data transfer.
+GRPC http://localhost:5001/FhirGrpcGateway.Server.PatientApi/GetEverything
+{
+  "id": "example"
+}
