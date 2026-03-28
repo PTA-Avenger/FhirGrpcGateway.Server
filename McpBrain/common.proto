@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option csharp_namespace = "FhirGrpcGateway.Server";
+
+package common;
+
+message Coding {
+  string system = 1;
+  string code = 2;
+  string display = 3;
+}
+
+message CodeableConcept {
+  string text = 1;
+  repeated Coding coding = 2;
+}
+
+message Identifier {
+  string system = 1;
+  string value = 2;
+}
+
+message Reference {
+  string reference = 1; // e.g., "Patient/123"
+  string display = 2;   // e.g., "Thato Mabena"
+}
+
+message HumanName {
+  string family = 1;
+  repeated string given = 2;
+  repeated string prefix = 3;
+}
+
+message ContactPoint {
+  string system = 1; // phone | email | pager
+  string value = 2;
+  string use = 3;    // home | work | mobile
+}

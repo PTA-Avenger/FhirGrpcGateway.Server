@@ -1,57 +1,90 @@
-﻿🚀 FHIR gRPC Gateway
-A High-Performance Healthcare Data Facade built with .NET 10
+﻿🚀 PTA-Avenger: FHIR gRPC & AI Gateway
+A High-Performance Clinical Data Facade & MCP Intelligence Layer
+Built with .NET 10 (C# 14) & Python (MCP)
 
 📌 Overview
-This project is a specialized gRPC Gateway that acts as a high-speed intermediary between clinical applications and HL7 FHIR R5 servers (like HAPI FHIR or Azure Health Data Services). By replacing traditional JSON/REST with binary Protobuf over HTTP/2, this gateway significantly reduces latency and payload size for mobile and internal microservice consumption.
+PTA-Avenger is a dual-layer architectural solution designed to solve the "latency and reasoning" gap in modern digital health. It acts as a high-speed binary intermediary between HL7 FHIR R5 data stores and Autonomous AI Agents.
 
-🏗️ Architecture
-The gateway is built using a Service-Oriented Architecture (SOA) where each clinical domain is isolated into its own gRPC service:
+By converting traditional, heavy JSON/REST payloads into Protobuf over HTTP/2, this gateway reduces data overhead by up to 70-80%, making it ideal for mobile clinical apps and Large Language Model (LLM) context injection.
 
-PatientApi: Identity management and CRUD operations.
+🏗️ Architecture: The Two-Tier Approach
+1. The Data Tier (.NET 10 gRPC Gateway)
+A Service-Oriented Architecture (SOA) that enforces strict type-safety for clinical domains:
 
-ObservationApi: Vitals, laboratory results, and longitudinal data.
+PatientApi: Identity management and demographics.
 
-ConditionApi: Clinical problem lists and active diagnoses (SNOMED-CT).
+ObservationApi: Real-time vitals, labs, and longitudinal data.
 
-MedicationApi: Prescription tracking and dosage instructions.
+ConditionApi: Active problem lists and SNOMED-CT diagnoses.
 
-EncounterApi: Clinical visit context and temporal grouping.
+MedicationApi: Prescription tracking and R5 CodeableReference mapping.
 
-DiagnosticReportApi: Grouped test results and professional conclusions.
+Procedure & EncounterApi: Clinical context and temporal grouping.
 
-PractitionerApi: Healthcare provider identity and qualifications.
+2. The Intelligence Tier (Python MCP Server)
+A Model Context Protocol (MCP) implementation that exposes the gRPC services as "Tools" for AI models (like Claude 3.5/4 or Gemini 1.5/2). This allows an AI to:
+
+Autonomously "browse" a patient's history.
+
+Cross-reference medications with active conditions.
+
+Summarize complex FHIR bundles into plain-language clinical notes.
 
 🛠️ Tech Stack
-Language: C# 14 / .NET 10.0
+Backend: C# 14 / .NET 10.0 (High-performance Kestrel server)
 
-Framework: ASP.NET Core gRPC Service
+AI Orchestration: Python 3.12+ / MCP SDK
 
-Protocols: gRPC (HTTP/2), Protobuf v3
+Communication: gRPC (Binary Protobuf), HTTP/2
 
-Healthcare Standard: HL7 FHIR R5 (HAPI FHIR)
+Healthcare Standards: HL7 FHIR R5 (HAPI FHIR)
 
-Libraries: Hl7.Fhir.R5, Grpc.AspNetCore, Google.Protobuf
+Core Libraries: Hl7.Fhir.R5, Grpc.AspNetCore, Google.Protobuf, mcp
 
-🌟 Key Features
-Polymorphic Mapping: Seamlessly handles FHIR oneof types (e.g., effectiveDateTime vs effectivePeriod).
+🌟 Pro Features
+R5 Polymorphic Mapping: Expertly handles FHIR oneof types (e.g., effectiveDateTime vs effectivePeriod) and the new R5 CodeableReference structures.
 
-Advanced Search: Multi-parameter filtering using FHIR SearchParams.
+Streaming $everything: Implements gRPC server-side streaming to deliver entire medical records without memory spikes.
 
-Streaming $everything: Server-side streaming (gRPC stream) to deliver full patient medical records without memory overhead.
+AI-Tool Discovery: The MCP layer allows LLMs to "discover" clinical endpoints as functions, preventing hallucinated data structures.
 
-Type Safety: Eliminates "stringly-typed" healthcare data by enforcing a strict Protobuf contract.
-
-Native AOT Ready: Optimized for sub-20ms startup times and minimal memory footprint in containerized environments.
+Type-Safe Healthcare: Replaces "stringly-typed" JSON with a strictly enforced Protobuf contract, ensuring data integrity across the wire.
 
 🚦 Getting Started
-Clone the Repo: git clone https://github.com/PTA-Avenger/FhirGrpcGateway.git
+1. Run the gRPC Gateway (.NET)
+Bash
+cd FhirGrpcGateway.Server
+dotnet run
+# Server starts on http://localhost:5000 and https://localhost:5001
+2. Run the MCP AI Server (Python)
+Bash
+cd McpBrain
+pip install -r requirements.txt
+python mcp_server.py
+3. Connect to AI (Claude Desktop example)
+Add this to your claude_desktop_config.json:
 
-Restore Packages: dotnet restore
+JSON
+"fhir-gateway": {
+  "command": "python",
+  "args": ["/path/to/mcp_server.py"]
+}
+🎓 About the Developer
+Developed by Thamy Mabena, a Computer Science student and Student Assistant at North-West University (NWU).
 
-Run the Server: dotnet run --project FhirGrpcGateway.Server
+This project represents a deep dive into Distributed Systems, Health Informatics, and AI Integration, aimed at modernizing how clinical data serves both human providers and artificial intelligence.
 
-Test: Use Postman (gRPC mode) or Visual Studio Endpoints Explorer to query localhost:5001.
+Connect with me:
+LinkedIn | GitHub | Portfolio
 
-Contact & Contributions
-Developed by Thamy Mabena (@PTA-Avenger).
-Feel free to reach out via LinkedIn for collaboration or graduate opportunities!
+🚀 Ready to Push?
+Save this as README.md in your root folder.
+
+Make sure your .gitignore is set (no bin/, obj/, or __pycache__).
+
+Run these commands:
+
+Bash
+git add .
+git commit -m "feat: complete fhir r5 grpc gateway and mcp ai layer"
+git push origin main

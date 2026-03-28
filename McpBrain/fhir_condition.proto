@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option csharp_namespace = "FhirGrpcGateway.Server";
+
+import "google/protobuf/timestamp.proto";
+
+import "common.proto";
+
+service ConditionApi {
+  // Enhanced to support listing/filtering, which MCP tools require
+  rpc GetPatientConditions (ConditionListRequest) returns (ConditionListResponse);
+  rpc GetCondition (ConditionRequest) returns (ConditionResponse);
+}
+
+message ConditionListRequest {
+  string patient_id = 1;
+  string category = 2; // e.g., "problem-list-item" or "encounter-diagnosis"
+}
+
+message ConditionRequest {
+  string id = 1;
+}
+
+message ConditionResponse {
+  string id = 1;
+  
+  // REQUIRED: clinicalStatus (active, recurrence, resolved) 
+  // and verificationStatus (unconfirmed, provisional, confirmed)
+  common.CodeableConcept clinical_status = 2; 
+  common.CodeableConcept verification_status = 3;
+  
+  // FHIR Category (Crucial for AI filtering)
+  repeated common.CodeableConcept category = 4;
+  
+  // The Diagnosis (SNOMED-CT or ICD-10)
+  common.CodeableConcept code = 5; 
+  
+  string subject = 6; // Reference to Patient
+  
+  // Timing: When it started and when it ended
+  oneof onset {
+    google.protobuf.Timestamp onset_date_time = 7;
+    string onset_string = 8;
+  }
+  
+  oneof abatement {
+    google.protobuf.Timestamp abatement_date_time = 9;
+    string abatement_string = 10;
+    bool abatement_boolean = 11; // true if resolved but date is unknown
+  }
+
+  string recorded_date = 12;
+  string asserter = 13; // Who made the diagnosis?
+  
+  // Narrative summary for the MCP agent to read directly
+  string note = 14; 
+}
+
+
+message ConditionListResponse {
+  repeated ConditionResponse conditions = 1;
+}
